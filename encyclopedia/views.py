@@ -10,7 +10,10 @@ def index(request):
 
 def new_entry(request):
     if request.method =="GET":
-        return render(request, "encyclopedia/new_entry.html")
+        return render(request, "encyclopedia/new_entry.html", {
+            "entries": util.list_entries()
+        })
+
 
 def display_entry(request, title):
     content=util.get_entry(title)
