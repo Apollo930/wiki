@@ -13,6 +13,9 @@ def new_entry(request):
         return render(request, "encyclopedia/new_entry.html", {
             "entries": util.list_entries()
         })
+    else:
+        util.save_entry(request.POST["title"], request.POST["content"])
+        return index(request)
 
 
 def display_entry(request, title):
