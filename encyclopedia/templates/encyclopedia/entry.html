@@ -5,7 +5,9 @@
 {% endblock %}
 
 {% block body %}
-
+    <a href="{% url 'index'%}{{title}}/edit" >
+        <p class="col-2 offset-10" style="align-items: right;">Edit page</p>
+    </a>
     {{data |safe}}
 
 {% endblock %}
