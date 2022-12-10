@@ -8,10 +8,20 @@
 
     <form action="{% url 'new' %}" method="post">
 		{% csrf_token %}
-		<div class="form-group">
-			<label for="title">Title</label>
-			<input type="text" class="form-control" id="title" name="title" placeholder="Enter title">
-		</div>
+
+		{% if title %}
+			<div class="form-group">
+				<h1>{{title}}</h1>
+				<input type="hidden" class="form-control" id="title" name="old_title" value={{title}}>
+			</div>
+
+		{% else %}
+			<div class="form-group">
+				<label for="title">Title</label>
+				<input type="text" class="form-control" id="title" name="title" placeholder="Enter title">
+			</div>
+		{% endif %}
+
 		<div class="form-group">
 			<label for="content">Content</label>
 			<textarea class="form-control" id="content" name="content" rows="3"> {{ content }} </textarea>

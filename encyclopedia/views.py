@@ -10,24 +10,34 @@ def index(request):
 
 def new_entry(request, title=""):
     if request.method =="GET":
-        if title:
+        if title:       #If editing an existing entry
             content=util.get_entry(title)
         else:
             content=""
+
         return render(request, "encyclopedia/new_entry.html", {
             "entries": util.list_entries(),
+            "title": title,
             "content": content,
         })
 
     else:
-        title, content= request.POST["title"], request.POST["content"]
-        if title not in util.list_entries():
+        if request.POST.get("title", False):
+            title, content= request.POST["title"], request.POST["content"]
+            if title not in util.list_entries():
+                util.save_entry(title, content)
+                return display_entry(request, title)
+            else:
+                return render(request, 'error_page.html', {
+                    'entries': util.list_entries(),
+                    'error_message':"There is already an entry with the same name."
+                } )
+
+        else:       #If editing an existing entry
+            title=request.POST.get("old_title")
+            content=request.POST.get("content")
             util.save_entry(title, content)
             return display_entry(request, title)
-        else:
-            return render(request, 'error_page.html', {
-                'error_message':"There is already an entry with the same name."
-            } )
 
 def edit_entry(request, title):
     content=util.get_entry(title)
