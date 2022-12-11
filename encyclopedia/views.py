@@ -1,7 +1,8 @@
 from django.shortcuts import render
 
 from . import util
-import markdown2
+import markdown2, re
+
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -10,9 +11,9 @@ def index(request):
 
 def new_entry(request, title=""):
     if request.method =="GET":
-        if title:       #If editing an existing entry
+        if title:       #editing an existing entry
             content=util.get_entry(title)
-        else:
+        else:           #creating a new entry
             content=""
 
         return render(request, "encyclopedia/new_entry.html", {
@@ -21,7 +22,7 @@ def new_entry(request, title=""):
             "content": content,
         })
 
-    else:
+    elif request.method =="POST":    #creating a new entry
         if request.POST.get("title", False):
             title, content= request.POST["title"], request.POST["content"]
             if title not in util.list_entries():
@@ -33,9 +34,8 @@ def new_entry(request, title=""):
                     'error_message':"There is already an entry with the same name."
                 } )
 
-        else:       #If editing an existing entry
-            title=request.POST.get("old_title")
-            content=request.POST.get("content")
+        else:       #editing an existing entry
+            title, content = request.POST.get("old_title"), request.POST.get("content")
             util.save_entry(title, content)
             return display_entry(request, title)
 
@@ -54,3 +54,16 @@ def display_entry(request, title):
         "title": title,
         "data": html
     })
+
+def search_entry(request):
+    title=request.POST.get("q")
+    if title in util.list_entries():
+        return display_entry(request, title)
+    else:
+        search_results=[]
+        for entry in util.list_entries():
+            if re.search(title, entry, re.IGNORECASE):
+                search_results.append(entry)
+        return render(request, "encyclopedia/index.html", {
+            "entries": search_results,
+        })
