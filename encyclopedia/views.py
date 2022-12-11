@@ -6,8 +6,10 @@ import markdown2, re
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
+        "heading": "All Pages",
         "entries": util.list_entries()
     })
+
 
 def new_entry(request, title=""):
     if request.method =="GET":
@@ -24,7 +26,7 @@ def new_entry(request, title=""):
 
     elif request.method =="POST":    #creating a new entry
         if request.POST.get("title", False):
-            title, content= request.POST["title"], request.POST["content"]
+            title, content= request.POST["title"].strip(), request.POST["content"].strip()
             if title not in util.list_entries():
                 util.save_entry(title, content)
                 return display_entry(request, title)
@@ -39,6 +41,7 @@ def new_entry(request, title=""):
             util.save_entry(title, content)
             return display_entry(request, title)
 
+
 def edit_entry(request, title):
     content=util.get_entry(title)
     return render(request, "encyclopedia/new_entry.html", {
@@ -46,7 +49,14 @@ def edit_entry(request, title):
         "content": content
     } )
 
+
 def display_entry(request, title):
+    if title not in util.list_entries():
+        return render(request, 'error_page.html', {
+            'entries': util.list_entries(),
+            'error_message':"There is no entry with this name."
+        } )
+    
     content=util.get_entry(title)
     html= markdown2.markdown(content)
     return render(request, "encyclopedia/entry.html", {
@@ -54,6 +64,7 @@ def display_entry(request, title):
         "title": title,
         "data": html
     })
+
 
 def search_entry(request):
     title=request.POST.get("q")
@@ -65,5 +76,6 @@ def search_entry(request):
             if re.search(title, entry, re.IGNORECASE):
                 search_results.append(entry)
         return render(request, "encyclopedia/index.html", {
+            "heading": "Search Results",
             "entries": search_results,
         })
